@@ -58,6 +58,7 @@ sheet.row_dimensions[1]  # ROW
 #col.font = Font(bold=True)
 
 from openpyxl.cell.cell import get_column_letter,column_index_from_string
+from openpyxl.utils import get_column_letter,column_index_from_string
 get_column_letter(1) #=> 'A'
 column_index_from_string('A') #=>1
 
