@@ -146,6 +146,11 @@ def now():
 # 高级用法
 - 列表生成式
   - [i for i in range(1,11)]
+
+  - [i for i in range(1,11) if i%2==0]
+
+  - [(i,i+2) **for** i **in** range(1,11) **if** i%2==0]
+
   - same as 
 
     ```python
@@ -155,16 +160,17 @@ def now():
     		lst.append(i)
     	return lst
     ```
+
   - 优势是性能快，简洁
 
 - 字典生成式
   - {i:i+1 for i in range(4)}
+  - {i:i+1 for i in range(10) if i%2==0}
   - 性能占优
 
 - 生成式
   - (i for i in range(4))
 
-    
 
 |列表生成式|字典生成式|生成器（generator）|迭代器（iterator）|
 |---|---|---|---|
@@ -208,7 +214,6 @@ isinstance([], Iterator) #==>False
 
 - 实例可以绑定自己的属性
 
-  
 ## 类属性和实例属性
 
 - 在Python中，实例的变量名如果以`__`开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问
@@ -297,6 +302,7 @@ class Weekday(Enum):
 
 
 - 元类(metaclass)
+
   - 动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是运行时动态创建的。
 
 - 超类（super）
@@ -408,6 +414,24 @@ time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
   - 只能读取==**一次**==
   - 实时生成数据，不全存内存中
 
+- zip
+
+  ```python
+  obj =zip([1,2,3],['a','b','c'])
+  #<zip object at 0x104c1d5c8>
+  
+  list(zip([1,2,3],['a','b','c']))
+  #[(1, 'a'), (2, 'b'), (3, 'c')]
+  
+  dict(zip([1,2,3],['a','b','c']))
+  #{1: 'a', 2: 'b', 3: 'c'}
+  
+  tuple(zip(*obj)) #=>解压zip
+  #((1, 2, 3), ('a', 'b', 'c'))
+  
+  ```
+
+
 # 作用域
 
 如果有一个局部 变量或参数与你要访问的全局变量同名，就无法直接访问全局变量，因为它被局部变量遮 住了，可使用函数globals来访问全局变量 。
@@ -482,14 +506,15 @@ time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
 - match()
 
    ```python
-  a='{1}{2}{3}{4}'
-  m=re.match('({.*})',a)
-  m.groups()  #=>('{1}{2}{3}{4}',) 贪婪匹配
-  
+     a='{1}{2}{3}{4}'
+     m=re.match('({.*})',a)
+     m.groups()  #=>('{1}{2}{3}{4}',) 贪婪匹配
+   ```
+
   a='{1}{2}{3}{4}'
   m=re.match('({.*?})',a)
   m.groups()  #=>('{1}',) 非贪婪匹配
-  
+
   line = "Cats are smarter than dogs";
   matchObj = re.match( r'dogs', line, re.M|re.I)
    ```
@@ -580,5 +605,3 @@ time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
     ['Palo Alto', ' CA']
     ###
     ```
-
-    
