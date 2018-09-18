@@ -59,6 +59,26 @@ isinstance(True,int) => True
 | 可以是引用 |      可以是引用      | key**不能**是引用   | **不能**是引用    |
 | 有序       |         有序         | 无序                | 无序              |
 
+```
+hashable
+- 如果一个对象在其生命周期内有一个固定不变的哈希值，且可以与其他对象进行比较操作，那么这个对象就是可哈希对象 (hashable) 可哈希对象必须有相同的哈希值才算作相等。 
+- 由于字典 (dict) 的键 (key) 和集合 (set) 内部使用到了哈希值，所以只有可哈希 (hashable) 对象才能被用作字典的键和集合的元素。 
+- 所有python内置的不可变对象都是可哈希的
+- 可变容器 (比如：列表 (list) 或者字典 (dict) set ) 都是不可哈希的。
+- 用户自定义的类的实例默认情况下都是可哈希的，它们跟其它对象都不相等
+- 能调用hash()的就是可哈希对象
+
+mutable
+- python里面，传递的都是对象的引用，也可以理解为传递的是地址。
+- 原地可变的数据类型有：list、dict、set，
+- 原地不可变的数据类型有：int、float、complex、string、tuple
+- 只有原地可变对象有add()，append()等操作。
+
+原地可变的list dict set是不可哈希的
+```
+
+
+
 
 - set可变，但是不能放入可变对象，比如 list或者其他的set
 - **直接赋值空{},将会是dict类型，如果要创建set类型，必须set{[]}**
@@ -411,8 +431,29 @@ time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
 
 - yield
   - 可迭代
+
   - 只能读取==**一次**==
+
   - 实时生成数据，不全存内存中
+
+  - 只能在function中用
+
+    ```python
+    In [181]: def num(max):
+         ...:     for i in range(max):
+         ...:         yield i
+       
+    
+    In [182]: f =num(5)
+    In [183]: next(f)
+    Out[183]: 0
+    In [185]: next(f)
+    Out[185]: 1
+    
+    
+    
+    
+    ```
 
 - zip
 
