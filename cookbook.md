@@ -764,3 +764,685 @@ In [5]: for ch in st1:
 
 ```
 
+### 3. 迭代器切片
+
+```python 
+In [33]: def count(n):
+    ...:     while True:
+    ...:         yield n
+    ...:         n += 1
+    ...:         
+In [34]: c = count(0)
+In [36]: import itertools 
+
+In [37]: for x in itertools.islice(c,10,20):
+    ...:     print(x)
+    ...:     
+#这里要着重强调的一点是会消耗掉传入的迭代器中的数据。必须考虑到 迭代器是不可逆的这个事实。所以如果你需要之后再次访问这个迭代器的话，那你就 得先将它里面的数据放入一个列表中。
+```
+
+### 4. 跳过开头部分
+
+```python
+with open('route')	as f:
+    lines = (lines for line in f if not line.startswith('#'))
+    for line in lines:
+        print(line, end='')
+# 上面这种方式会跳过所有# 开头的，如果只想去掉前面以#开头的部分
+from itertools import dropwhile
+with open('route')	as f:
+    for line in dropwhile(lambda line: line.startwith('#'),f):
+    	print(line,end='')
+        
+        
+# other example       
+In [39]: from itertools import dropwhile
+In [40]: items =['a','b',1,2,3,'d',1]
+
+In [42]: list(dropwhile(lambda x : type(x)==str,items))
+Out[42]: [1, 2, 3, 'd', 1]
+    
+```
+
+### 5. 索引迭代
+
+```python
+# enumerate
+items =['a','b',1,2,3,'d',1]
+for i,v in enumerate(items):
+    print(i,v)
+
+# zip
+In [45]: a =[1,2,3]
+
+In [46]: b=['a','b','c','d']
+
+In [47]: for i in zip(a,b):
+    ...:     print(i)
+    ...:     
+(1, 'a')
+(2, 'b')
+(3, 'c')
+
+In [48]: from itertools import zip_longest
+
+In [49]: for i in zip_longest(a,b):
+    ...:     print(i)
+    ...:     
+(1, 'a')
+(2, 'b')
+(3, 'c')
+(None, 'd')
+
+# zip to dict
+s= dict(zip(a,b))
+
+# more than two
+zip(a,b,c,d...)
+# attention to zip is a iter, you can use list ,transfer to list..
+
+```
+
+### 6. 不同集合元素的迭代
+
+```python
+# 
+In [50]: from itertools import chain
+
+In [51]: a =[1,2,3,4]
+
+In [52]: b=['x','y','z']
+
+In [53]: for x in chain(a,b): # use a+b can also works,but it will consume the memory.
+    ...:     print(x)
+    ...:     
+1
+2
+3
+4
+x
+y
+z
+```
+
+### 7. 展开嵌套序列
+
+```python 
+from collections import Iterable
+In [58]: items=[1,2,[3,4,[5,6],7],8]
+
+In [65]: def flatten(items,ignore_types=(str,bytes)):
+    ...:     for x in items:
+    ...:         if isinstance(x,Iterable) and not isinstance(x,ignore_types):
+    ...:             yield from flatten(x)
+        			 # 等同于下面
+        			 '''
+        			 for i in flatten(x):
+        			     yield i 
+        			 '''
+    ...:         else:
+    ...:             yield x
+    ...:             
+
+In [66]: for i in flatten(items):
+    ...:     print(i)
+    ...:     
+
+#yield from example
+In [67]: def test(lst):
+    ...:     yield from lst
+    ...:     
+
+In [70]: list(test([1,2,3,4]))
+Out[70]: [1, 2, 3, 4]
+
+
+```
+
+## 5. 文件读写
+
+### 1.模式
+
+```python 
+#open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
+#默认mode='rt' read and text mode
+    'r'       open for reading (default)
+    'w'       open for writing, truncating the file first # 不存在会创建
+    'x'       create a new file and open it for writing  # 文件已存在会报错
+    'a'       open for writing, appending to the end of the file if it exists
+    'b'       binary mode
+    't'       text mode (default)
+    '+'       open a disk file for updating (reading and writing)
+# the mode 'w+b' opens and truncates the file to 0 bytes
+# 'r+b' opens the file without truncation
+# The 'x' mode implies 'w' and raises an `FileExistsError` if the file already exists.
+
+# 默认使用的是系统编码，可以使用这个方法来查找
+import sys
+In [8]: sys.getdefaultencoding()
+Out[8]: 'utf-8'
+
+    
+## 关于换行符
+newline controls how universal newlines works (it only applies to text
+    mode). It can be None, '', '\n', '\r', and '\r\n'.  It works as
+    follows:
+    #newline None   \n
+    		 ''
+    * On input, if newline is None, universal newlines mode is
+      enabled. Lines in the input can end in '\n', '\r', or '\r\n', and
+      these are translated into '\n' before being returned to the
+      caller. If it is '', universal newline mode is enabled, but line
+      endings are returned to the caller untranslated. If it has any of
+      the other legal values, input lines are only terminated by the given
+      string, and the line ending is returned to the caller untranslated.
+    
+    * On output, if newline is None, any '\n' characters written are
+      translated to the system default line separator, os.linesep. If
+      newline is '' or '\n', no translation takes place. If newline is any
+      of the other legal values, any '\n' characters written are translated
+      to the given string.
+    
+ In [11]: with open("test.txt",'w',newline='') as f:
+    ...:     f.write('abc\n')
+    ...:     f.write('abc\r\n')
+    ...:     f.write('abc')
+    ...:     f.write('efg')
+'''
+abc
+abc
+abcefg
+'''
+In [13]: import os
+In [14]: os.linesep
+#默认处理了，把\r\n 转成了\n    
+Out[14]: '\n'
+In [17]: f =open("test.txt")
+In [18]: f.read()
+Out[18]: 'abc\nabc\nabcefg'
+# python 不对newline处理
+In [19]: f =open("test.txt",newline='')
+In [20]: f.read()
+Out[20]: 'abc\nabc\r\nabcefg'     
+    
+    
+# erros
+erros="replace" # replace with ?
+erros="ignore" #ignore it
+```
+
+### 2. 打印输出至文件中
+
+```python
+# 指定文件路径
+In [28]: with open('/Users/henry.wang/Desktop/test.txt','w') as f:
+    ...:     f.write('123')
+# 使用print（只支持文本，不支持二进制）
+In [29]: with open('/Users/henry.wang/Desktop/test.txt','w') as f:
+    ...:     print('abc') # 这种不会写入
+abc
+
+In [30]: with open('/Users/henry.wang/Desktop/test.txt','w') as f:
+    ...:     print('abc',file=f) # 要传file =f
+ 
+if not os.path.exists("somefile"):
+    pass
+
+```
+
+### 3. 文件路径名操作
+
+```python
+import os
+path='/Users/henry.wang/Desktop/test.txt'
+os.path.basename(path)  #'test.txt'
+os.path.dirname(path)   #'/Users/henry.wang/Desktop'
+
+os.path.join("tmp","data",os.path.basename(path)) #'tmp/data/test.txt'
+os.path.join("tmp","data/1",os.path.basename(path)) #'tmp/data/1/test.txt'
+
+In [39]: path ="~/data/data.csv" #扩展~
+In [40]: os.path.expanduser(path) #'/Users/henry.wang/data/data.csv'
+
+In [41]: path ="/data/data.csv" #还是不变
+In [42]: os.path.expanduser(path) #'/data/data.csv'
+
+# split the file extention.    
+os.path.splittext(path) # ('~/data/data','.csv')
+
+# 测试文件是否存在
+if not os.path.exists("somefile"):
+    pass
+
+#文件夹是否存在
+In [52]: os.path.isdir('/Users/henry.wang') #True
+# 文件是否存在
+In [53]: os.path.isfile('/Users/henry.wang/desktop/test.txt')
+    
+# other
+os.path.islink
+os.path.realpath
+os.path.getsize # 文件或文件夹大小
+os.path.gettime # 修改日期
+
+# 获取文件夹中的文件列表
+os.listdir
+
+# 对文件名的匹配 glob fnmatch
+
+
+```
+
+## 6. 数据编码和处理
+
+### 1. csv
+
+```python
+import csv
+with open('stocks.csv') as f:
+    data = csv.reader(f)
+    headers = next(data)
+    for row in data:
+        pass
+#通过row[0]..访问列数据，可以用命名元组
+import csv
+with open('stocks.csv') as f:
+    data = csv.reader(f)
+    headers = next(data)
+    Row = namedtuple('Row',headers)
+    for r in data:
+        row = Row(*r)
+        #row.rare,row.bbb...列名合法才生效
+## 另外一种选择就是读取到字典中
+     
+In [71]: with open("ADMIN_20180917(10).csv") as f:
+    ...:     data= csv.DictReader(f)
+    ...:     for row in data:
+    ...:         print(row)
+    ...:         break
+    
+OrderedDict([('ADCODE', '1.1E+11'), ('ADLEVEL', '1'), ('ADNAME_CHN', '北京市'), ('ADNAME_ENG', 'Beijing'), ('PARENT_ADCODE', '')])
+
+In [73]: with open("ADMIN_20180917(10).csv") as f:
+    ...:     data= csv.DictReader(f)
+    ...:     for row in data:
+    ...:         print(row["ADNAME_ENG"])
+    ...:         break
+    ...:        
+Beijing
+        
+# 写入csv. 需要先创建一个writer对象
+with open('file','w') as f:
+    f_csv = csv.writer(f)
+    f_csv.writerow(['h','h2','h3'])
+    f_csv.writerrows([(1,2,3),(...)])
+    
+# 写入字典对象
+headers=[...]
+rows=[{..},{..}]
+with open（'file','w'）as f:
+    f_csv =csv.DictWriter(f,headers)
+    f_csv.writeheader()
+    f_csv.writerows(rows)
+```
+
+### 2. JSON
+
+```python
+import json
+json.dumps()  # int,str,dict,list,tuple,set to =>json(str)
+json.loads()  # to =>python (dict,list,tuple,set,int,str)
+
+#json_dumps(alltype)
+In [75]: data={'name':'a',"shr":100,'price':2323.2}
+In [76]: json.dumps(data)
+Out[76]: '{"name": "a", "shr": 100, "price": 2323.2}'
+
+In [77]: d_list=[1,2,3,4,5,6]
+In [78]: json.dumps(d_list)
+Out[78]: '[1, 2, 3, 4, 5, 6]'
+
+In [79]: d_s ='123'
+In [80]: json.dumps(d_s)
+Out[80]: '"123"'
+
+In [81]: d_n =123
+In [83]: json.dumps(d_n)
+Out[83]: '123'
+ 
+#json_loads(str)    
+
+# 如果处理的是文件，而不是字符串，那么可以使用json.dump() json.load 来编码和解码数据
+with open('data.json','w') as f:
+    json.dump(data,f)
+with open('data.json','r') as f:
+    data =json.load(f)
+    
+# 支持基本数据类型 None  bool int float str 
+	True => true False => false
+    None => null
+    
+# 对于字典key要是字符串，如果不是字符串会做转化,最好不要用数字做key
+In [86]: d
+Out[86]: {1: 'a'}
+
+In [87]: json.loads(json.dumps(d))
+Out[87]: {'1': 'a'}
+
+from pprint import pprint
+import sys
+pprint(sys.path) #格式化输出，更好看
+# ps,ipython自带
+
+#indent #格式化输出
+In[5]:json.dumps(data,indent=4
+Out[5]: '{\n    "a": 2,\n    "b": 123\n}'
+In [6]: print(json.dumps(data,indent=4))
+{
+    "a": 2,
+    "b": 123
+}
+
+```
+
+## 7. 函数
+
+### 1. 函数注解
+
+```python
+def add(x:int,y:int)->int:
+    return x+y
+
+- python3.5引入
+- 只是说明，不检查类型
+- 可以用第三方工具作分析
+- 注解信息可以通过add.__annotaions__ 查看
+- 通过help函数也可以查看
+
+```
+
+### 2. 函数默认值 
+
+```python
+def spam(a,b=None)# 后面可以穿入各种对象
+
+# 默认参数的值应该是不可变对象，比如None True False或者数字，不能是可变对象
+def spam(a,b=[]) # 这里对b对象的操作会被记住。
+
+#匿名函数捕获默认值
+a= lambda y : x+y
+#x 定义改变时，会影响最重的结果,可以用下面这种方式绑定
+a= lambda y，x=x : x+y
+```
+
+### 3. 减少可调用函数的参数个数
+
+```python
+#functools.partial() #给某些函数的值预先赋值
+def spam(a,b,c,d):
+    print(a,b,c,d)
+from functools import partial
+
+In [51]: s1 = partial(spam,1) # a=1
+In [52]: s1(2,3,4)
+1 2 3 4
+
+In [53]: s2= partial(spam,b=2) # 还是要保持顺序的，否则报错
+In [54]: s2(3,3,3) # 报错 spam() got multiple values for argument 'b'
+
+In [55]: s2 =partial(spam,d=4)
+In [56]: s2(3,3,3)
+3 3 3 4
+
+In [58]: s3= partial(spam,1,2,d=43)
+In [59]: s3(3)
+1 2 3 43
+
+
+```
+
+### 4. 带额外信息的回调函数
+
+```python
+In [61]: def apply_async(func,args,*,callback):
+    ...:     result= func(*args)
+    ...:     callback(result)
+    ...:     
+
+In [62]: def print_result(result):
+    ...:     print('GOT:',result)
+    ...:     
+
+In [63]: def add(x,y):
+    ...:     return x +y
+
+
+In [64]: apply_async(add,(2,3),callback=print_result)
+GOT: 5
+
+In [65]: apply_async(add,(2,3),3,callback=print_result)
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-65-905baa63a934> in <module>()
+----> 1 apply_async(add,(2,3),3,callback=print_result)
+
+TypeError: apply_async() takes 2 positional arguments but 3 positional arguments (and 1 keyword-only argument) were given
+
+#这个* 其实是被忽略了，可以强制使用关键字传递最后一个函数，比如
+def ss(n,*,block):
+    pass
+
+ss(1,2)#ss() takes 1 positional argument but 2 were given
+ss(1) # ss() missing 1 required keyword-only argument: 'block'
+ss(1,block=1)
+
+# 为了让回调函数访问外部信息，比如要再上面的方法再加个序号
+
+## 类实现
+In [76]: class ResultHandler(object):
+    ...:     def __init__(self):
+    ...:         self.seq = 0
+    ...:     def handler(self,result):
+    ...:         self.seq+=1
+    ...:         print(self.seq,'got',result)
+    ...:         
+
+In [77]: r=ResultHandler()
+In [80]: r.handler('haha')
+1 got haha
+In [82]: r.handler('haha2')
+2 got haha2
+
+#闭包实现
+In [89]: def make_handler():
+    ...:     seq = 0
+    ...:     def handler(result):
+    ...:         nonlocal seq  # 这里的nonlocal
+    ...:         seq += 1
+    ...:         print(seq,'got',result)
+    ...:     return handler
+    ...: 
+    ...: 
+    ...: 
+
+In [90]: f =make_handler()
+
+In [91]: apply_async(add,(3,3),callback=make_handler)
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-91-eda109ab5fb5> in <module>()
+----> 1 apply_async(add,(3,3),callback=make_handler)
+
+<ipython-input-61-212f2128309b> in apply_async(func, args, callback)
+      1 def apply_async(func,args,*,callback):
+      2     result= func(*args)
+----> 3     callback(result)
+      4 
+
+#TypeError: make_handler() takes 0 positional arguments but 1 was given
+# 闭包就返回函数，事后传值
+In [92]: apply_async(add,(3,3),callback=f)
+1 got 6
+
+In [93]: apply_async(add,(3,7),callback=f)
+2 got 10
+
+
+
+```
+
+### 5. 协程
+
+```python
+# 关于send 用法
+#send：Resumes the generator and "sends" a value that becomes the result of the current yield-expression.
+
+#can't send non-None value to a just-started generator(which means can send none)
+
+# send(None) 启动生成器  c.next() 和 c.send(None) 作用是一样的。
+# 这两个函数的区别是send()可以传递yield表达式的值进去，而next()不能传递特定的值，只能传递None进去。
+
+# 需要提醒的是，第一次调用时，请使用next()语句或是send(None)，不能使用send发送一个非None的值，否则会出错的，因为没有Python yield语句来接收这个值。
+def gen():
+    while True:
+        receive = yield 1
+        print('extra'+str(receive))
+g =gen()
+print(next(g)) #1
+print(g.send(111))#extra111 1
+print(next(g))# extraNone 1
+
+
+# 协程
+#1.最大的优势就是协程极高的执行效率
+#2.第二大优势就是不需要多线程的锁机制
+
+def consumer():
+  r = 'here'
+  while True:
+    n1 = yield r
+    if not n1:
+      return
+    print('[CONSUMER] Consuming %s...' % n1)
+    r = '200 OK'+str(n1)
+ 
+def produce(c):
+  aa = c.send(None) 
+  n = 0
+  while n < 5:
+    n = n + 1
+    print('[PRODUCER] Producing %s...' % n)
+    r1 = c.send(n)
+    print('[PRODUCER] Consumer return: %s' % r1)
+  c.close()
+ 
+c = consumer()
+produce(c)
+#下面来着重说明下send执行的顺序。当第一次send（None）（对应11行）时，启动生成器，从生成器函数的第一行代码开始执行，直到第一次执行完yield（对应第4行）后，跳出生成器函数。这个过程中，n1一直没有定义。
+
+#下面运行到send（1）时，进入生成器函数，注意这里与调用next的不同。这里是从第4行开始执行，把1赋值给n1，但是并不执行yield部分。下面继续从yield的下一语句继续执行，然后重新运行到yield语句，执行后，跳出生成器函数。
+#即send和next相比，只是开始多了一次赋值的动作，其他运行流程是相同的。
+```
+
+### 6. 访问闭包当中的变量
+
+```python
+def sample():
+    n = 0
+    def func():
+        print("n=", n )
+    def get_n():
+        return n 
+    def set_n():
+        nonlocal n 
+        n =value
+    func.get_n = get_n
+    func.set_n = set_n
+    return func
+
+f = sample()
+f() # n =0
+f.set_n(10) 
+f() # n =10
+f.get_n() # 10
+#nonlocal声明可以让 我们编写函数来修改内部变量的值。
+#其次，函数属性允许我们用一种很简单的方式将 访问方法绑定到闭包函数上，这个跟实例方法很像  尽管并没有定义任何类 。
+
+```
+
+## 8. 类与对象
+
+### 1.改变对象的字符串显示
+
+```python
+class Pair:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+    def __repr__(self):
+        return 'Pair({0.x},{0.y})'.format(self)
+        #return 'Pair({0.x!r},{0.y!r})'.format(self)
+        #return 'Pair({self.x},{self.y})'.format(self=self)
+		#一个对象本身不是str，ascii，repr格式，可以使用!s、!a、!r，将其转成str，ascii，repr
+    def __str__(self):
+        return 'Pair({0.x!s},{0.y!s})'.format(self)
+    
+
+# 其他
+__solt__ 限定属性，可以节省大量内存
+```
+
+|`__repr__`|`__str__`|Remark|
+|---|---|---|
+|创建实例时|print时输出|如果str没有定义，就会使用repr代替输出|
+
+## 9.元编程
+
+## 10. 模块与包
+
+### 1. 构建一个模块的层级包
+
+```python
+# 确保每个文件夹下都有一个__init__.py文件
+import lv1.lv2.lv3
+from lv1 import xx
+import lv1.lv2 as df
+#文件__init__.py的 目的是要包含不同运行级别的包的可选的初始化代码
+#绝大部分时候让__init__.py空着就好。但是有些情况下可能包含代码。比如能够用来自动加载子模块 
+#其他常用用法包括将多个文件合并到一个逻辑命名空间
+#不包含__init__.py 其实也能导入包，但最好是加上
+
+#如果模块要导入同目录下的模块
+from . import xx
+#如果模块要导入不通目录下的模块
+from .. import xx
+#在包内既可以使用相对路径，也可以使用绝对路径
+
+import .grok #错误
+
+# 相对导入不能定义到包目录之外
+# 如果包的部分被作为脚本直接执行，将报错 python3 mypack/A/spam.py. # erros
+#如果你使用python的-m选项来执行先前的脚本，相对导入将会正确运行。 python3 -m mypack.A.spam 
+
+## 将模块分割成多个文件
+# mymodule.py
+class A:
+    pass
+class B(A):
+    pass
+#替代方案
+mymodule/
+	__init__.py  #from .a import A from .b import B
+    a.py # class A
+    b.py # from .a import A  class B(A)
+#CODE HERE
+import mymodule
+a= mymodule.A()
+b= mymodule.B()
+
+
+from mymoudle.a import A
+from mymoudle.b import B
+
+```
+

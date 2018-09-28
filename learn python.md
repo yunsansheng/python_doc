@@ -189,6 +189,7 @@ def now():
   - 性能占优
 
 - 生成式
+
   - (i for i in range(4))
 
 
@@ -489,7 +490,7 @@ time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
   external = 'berry'
   combine('Shrub')
   
-  #像这样访问全局变量是众多bug的根源。务必慎用全局变量。
+  #像上面这样访问全局变量是众多bug的根源。务必慎用全局变量。
   
   def combine(parameter):
       print(parameter + globals()['parameter'])

@@ -17,3 +17,14 @@
 
      - ##### ！cmd 执行shell
 
+## ipython 使用
+
+```
+pip3 install jupyter
+
+#启动
+ipython notebook
+```
+
+
+
