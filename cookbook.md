@@ -203,7 +203,7 @@ Out[155]: {'x': 1, 'y': 2}
 ```python
 #如果序列上的值都是hashable
 def dedupe(items):
-    seen =set()#这个只是用来判断，不返回
+    seen =set()
     for item in items:
         if item not in seen:
             yield item
@@ -1075,7 +1075,7 @@ Beijing
 with open('file','w') as f:
     f_csv = csv.writer(f)
     f_csv.writerow(['h','h2','h3'])
-    f_csv.writerrows([(1,2,3),(...)])
+    f_csv.writerrows([(1,2,3),(...)])	
     
 # 写入字典对象
 headers=[...]

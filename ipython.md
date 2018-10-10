@@ -24,7 +24,20 @@ pip3 install jupyter
 
 #启动
 ipython notebook
+或者
+jupyter notebook
+
+Shift-Enter 执行
+两种方式都可以保留运行的变量
+%load 加载脚本 
+%run 运行脚本
+Ctrl-C 停止运行
+
 ```
 
+## notebook使用
 
+```
+https://www.jianshu.com/p/bb0eab1b2535
+```
 
