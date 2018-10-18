@@ -281,6 +281,10 @@ Out[216]: Counter({'a': 2, 'b': 2, 'c': 3, 'd': 2, 'e': 1})
 word_ct1+word_ct2
 word_ct1-word_ct2
 
+obj= Counter(word)
+for k,v in obj.items():
+    print(k,v)
+
 ```
 
 ### 10. 通过字段将序列分组
