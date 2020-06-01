@@ -1079,7 +1079,7 @@ Beijing
 with open('file','w') as f:
     f_csv = csv.writer(f)
     f_csv.writerow(['h','h2','h3'])
-    f_csv.writerrows([(1,2,3),(...)])	
+    f_csv.writerows([(1,2,3),(...)])	
     
 # 写入字典对象
 headers=[...]
